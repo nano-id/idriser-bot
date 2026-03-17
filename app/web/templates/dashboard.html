@@ -1,0 +1,1021 @@
+{% extends "base.html" %}
+
+{% block title %}ID-Riser{% endblock %}
+
+{% block sidebar %}
+<div class="sidebar-section">
+  <span class="sidebar-label" data-i18n="sidebar.main">Main</span>
+  <nav class="sidebar-nav" aria-label="Dashboard Sections">
+    <button class="nav-link active" type="button" data-tab-target="overview-tab" aria-selected="true">
+      <span class="nav-link-title" data-i18n="nav.dashboard">Dashboard</span>
+      <span class="nav-link-sub" data-i18n="nav.dashboardSub">Overview</span>
+    </button>
+    <button class="nav-link" type="button" data-tab-target="signals-tab" aria-selected="false">
+      <span class="nav-link-title" data-i18n="nav.signals">Signals</span>
+      <span class="nav-link-sub" data-i18n="nav.signalsSub">Market feed</span>
+    </button>
+    <button class="nav-link" type="button" data-tab-target="parameters-tab" aria-selected="false">
+      <span class="nav-link-title" data-i18n="nav.parameters">Parameters</span>
+      <span class="nav-link-sub" data-i18n="nav.parametersSub">Strategy config</span>
+    </button>
+    <button class="nav-link" type="button" data-tab-target="paper-tab" aria-selected="false">
+      <span class="nav-link-title" data-i18n="nav.paper">Paper</span>
+      <span class="nav-link-sub" data-i18n="nav.paperSub">Simulated desk</span>
+    </button>
+    <button class="nav-link" type="button" data-tab-target="runtime-tab" aria-selected="false">
+      <span class="nav-link-title" data-i18n="nav.runtime">Runtime</span>
+      <span class="nav-link-sub" data-i18n="nav.runtimeSub">Controls</span>
+    </button>
+  </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="page-header panel panel-soft">
+  <div>
+    <p class="section-label" data-i18n="page.sectionLabel">Dashboard</p>
+    <h1 data-i18n="page.title">Welcome back to ID-Riser</h1>
+    <p class="page-subtitle" data-i18n="page.subtitle">Track engine health and active market candidates from one technical command surface.</p>
+  </div>
+  <div class="page-header-badges">
+    <span class="chip chip-brand" id="overview-llm-provider">LLM -</span>
+    <span class="chip" id="overview-decision-horizon">Horizon -</span>
+    <span class="chip" id="overview-runtime-override">Runtime default</span>
+  </div>
+</section>
+
+<section class="panel panel-soft action-bar">
+  <div class="panel-header">
+    <h2 data-i18n="controls.title">Controls</h2>
+    <p data-i18n="controls.subtitle">Core engine actions</p>
+  </div>
+  <div class="controls-stack">
+    <div class="controls-grid">
+      <button id="engine-start-btn" class="btn btn-primary" type="button" data-i18n="controls.startEngine">Start Engine</button>
+      <button id="engine-stop-btn" class="btn btn-danger" type="button" data-i18n="controls.stopEngine">Stop Engine</button>
+    </div>
+  </div>
+  <div id="feedback-banner" class="feedback-banner hidden" role="status"></div>
+</section>
+
+<section id="overview-tab" class="tab-panel active" role="tabpanel">
+  <div class="kpi-grid">
+    <article class="kpi-card">
+      <span class="kpi-label" data-i18n="kpi.engineState">Engine State</span>
+      <strong class="kpi-value" id="hero-engine-state">unknown</strong>
+      <span class="kpi-meta" id="engine-last-run">-</span>
+    </article>
+    <article class="kpi-card">
+      <span class="kpi-label" data-i18n="kpi.activeSignals">Active Signals</span>
+      <strong class="kpi-value" id="hero-signal-count">0</strong>
+      <span class="kpi-meta" id="hero-signal-meta">-</span>
+    </article>
+    <article class="kpi-card">
+      <span class="kpi-label" data-i18n="kpi.decisionHorizon">Decision Horizon</span>
+      <strong class="kpi-value" id="hero-decision-horizon">-</strong>
+      <span class="kpi-meta" id="status-llm-configured">-</span>
+    </article>
+  </div>
+
+  <div class="content-grid content-grid--single">
+    <section class="panel signal-radar-card">
+      <div class="panel-header">
+        <h2 data-i18n="overview.signalRadar">Signal Radar</h2>
+        <p data-i18n="overview.signalRadarSub">Top current candidates from the latest scan pass</p>
+      </div>
+      <div id="overview-signal-list" class="signal-radar-list"></div>
+      <div id="overview-signal-empty" class="empty-state hidden" data-i18n="overview.noSignals">No active signals yet.</div>
+    </section>
+  </div>
+
+  <div class="summary-grid summary-grid--single">
+    <section class="panel panel-compact">
+      <div class="panel-header">
+        <h2 data-i18n="overview.systemStatus">System Status</h2>
+        <p data-i18n="overview.systemStatusSub">Backend health and runtime wiring</p>
+      </div>
+      <div class="status-chip-grid">
+        <div class="status-chip">
+          <span data-i18n="labels.appVersion">App Version</span>
+          <strong id="status-app-version">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.exchange">Exchange</span>
+          <strong id="status-exchange-id">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.decisionHorizon">Decision Horizon</span>
+          <strong id="status-decision-horizon">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.llmProvider">LLM Provider</span>
+          <strong id="status-llm-provider">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.llmEnabled">LLM Enabled</span>
+          <strong id="status-llm-enabled" class="badge badge-neutral">unknown</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.runtimeOverride">Runtime Override</span>
+          <strong id="status-runtime-override" class="badge badge-neutral">unknown</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+
+<section id="signals-tab" class="tab-panel" role="tabpanel" aria-hidden="true">
+  <div class="content-grid">
+    <section class="panel">
+      <div class="panel-header">
+        <h2 data-i18n="signals.aggregateTitle">Latest Aggregate Signals</h2>
+        <p data-i18n="signals.aggregateSub">Latest multi-horizon aggregate payload from backend state</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="table.symbol">Symbol</th>
+              <th data-i18n="table.horizon">Horizon</th>
+              <th data-i18n="table.meanSignal">Mean Signal</th>
+              <th data-i18n="table.bullishRatio">Bullish Ratio</th>
+              <th data-i18n="table.stability">Stability</th>
+              <th data-i18n="table.breakout">Breakout</th>
+              <th data-i18n="table.windowComplete">Window Complete</th>
+              <th data-i18n="table.fallback">Fallback</th>
+              <th data-i18n="table.step2Score">Step2 Score</th>
+              <th data-i18n="table.step2Pass">Step2 Pass</th>
+              <th data-i18n="table.regime">Regime</th>
+              <th data-i18n="table.step3Pass">Step3 Pass</th>
+              <th data-i18n="table.finalStatus">Final Durum</th>
+              <th data-i18n="table.rejectStage">Elenme</th>
+            </tr>
+          </thead>
+          <tbody id="aggregate-signals-body"></tbody>
+        </table>
+      </div>
+      <div id="aggregate-empty-state" class="empty-state hidden" data-i18n="signals.noAggregate">No aggregate signals available yet.</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2 data-i18n="signals.aiTitle">Latest AI Signals</h2>
+        <p data-i18n="signals.aiSub">Provider-agnostic support outputs (fallback-aware)</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="table.symbol">Symbol</th>
+              <th data-i18n="table.provider">Provider</th>
+              <th data-i18n="table.supportScore">Support Score</th>
+              <th data-i18n="table.narrativeStrength">Narrative Strength</th>
+              <th data-i18n="table.riskLabel">Risk Label</th>
+              <th data-i18n="table.fallback">Fallback</th>
+              <th data-i18n="table.summary">Summary</th>
+            </tr>
+          </thead>
+          <tbody id="ai-signals-body"></tbody>
+        </table>
+      </div>
+      <div id="ai-empty-state" class="empty-state hidden" data-i18n="signals.noAi">No AI support signals available yet.</div>
+    </section>
+  </div>
+</section>
+
+<section id="parameters-tab" class="tab-panel" role="tabpanel" aria-hidden="true">
+  <div class="content-grid content-grid--single">
+    <section class="panel">
+      <div class="panel-header">
+        <h2 data-i18n="parameters.configTitle">Parameters</h2>
+        <p data-i18n="parameters.configSub">Configure runtime, engine, AI, and aggregation settings from one place.</p>
+      </div>
+      <div class="parameter-subnav" role="tablist" aria-label="Parameter Sections">
+        <button class="subnav-link active" type="button" data-parameter-section-target="parameter-step1">
+          <span data-i18n="parameters.step1Tab">Step1</span>
+        </button>
+        <button class="subnav-link" type="button" data-parameter-section-target="parameter-step2">
+          <span data-i18n="parameters.step2Tab">Step2</span>
+        </button>
+        <button class="subnav-link" type="button" data-parameter-section-target="parameter-step3">
+          <span data-i18n="parameters.step3Tab">Step3</span>
+        </button>
+        <button class="subnav-link" type="button" data-parameter-section-target="parameter-ai">
+          <span data-i18n="parameters.aiTab">AI</span>
+        </button>
+        <button class="subnav-link" type="button" data-parameter-section-target="parameter-paper">
+          <span data-i18n="parameters.paperTab">Simulation</span>
+        </button>
+      </div>
+      <div class="parameter-summary-grid">
+        <article class="parameter-summary-card">
+          <span class="parameter-summary-label" data-i18n="labels.decisionHorizon">Decision Horizon</span>
+          <strong id="parameter-summary-horizon">-</strong>
+        </article>
+        <article class="parameter-summary-card">
+          <span class="parameter-summary-label" data-i18n="labels.snapshotTimeframe">Snapshot Timeframe</span>
+          <strong id="parameter-summary-snapshot">-</strong>
+        </article>
+        <article class="parameter-summary-card">
+          <span class="parameter-summary-label" data-i18n="labels.includeStep2">Include Step2</span>
+          <strong id="parameter-summary-step2" class="badge badge-neutral">-</strong>
+        </article>
+        <article class="parameter-summary-card">
+          <span class="parameter-summary-label" data-i18n="labels.includeStep3">Include Step3</span>
+          <strong id="parameter-summary-step3" class="badge badge-neutral">-</strong>
+        </article>
+        <article class="parameter-summary-card">
+          <span class="parameter-summary-label" data-i18n="labels.llmProvider">LLM Provider</span>
+          <strong id="parameter-summary-ai">-</strong>
+        </article>
+        <article class="parameter-summary-card">
+          <span class="parameter-summary-label" data-i18n="labels.paperEnabled">Simülasyon Açık</span>
+          <strong id="parameter-summary-paper" class="badge badge-neutral">-</strong>
+        </article>
+      </div>
+      <div class="parameter-overview-note">
+        <strong data-i18n="parameters.overviewTitle">How to use this page</strong>
+        <p data-i18n="parameters.overviewSub">Step1 controls data intake and aggregate scoring. Step2 controls technical filtering. Step3 controls regime vetoes. AI and simulation stay isolated from the core signal engine.</p>
+      </div>
+      <form id="runtime-config-form" class="config-form">
+        <section id="parameter-step1" class="parameter-panel active" aria-hidden="false">
+          <div class="parameter-status-grid">
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusDataFlow">Data Flow</span>
+              <strong id="parameter-step1-flow">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusRequiredSnapshots">Required Snapshots</span>
+              <strong id="parameter-step1-window">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusWeightTotal">Weight Total</span>
+              <strong id="parameter-step1-weights">-</strong>
+            </article>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step1DataTitle">Step1 Veri ve Taramalar</h3>
+              <p data-i18n="parameters.step1DataSub">Evren, snapshot ve toplulaştırma ayarları.</p>
+            </div>
+            <div class="form-grid">
+              <label>
+                <span class="label-text" data-i18n="labels.decisionHorizon">Decision Horizon</span>
+                <select id="cfg-decision-horizon" name="decision_horizon" required></select>
+                <span class="field-hint" data-i18n="parameters.hintDecisionHorizon">Defines which decision window the trade score is built for.</span>
+              </label>
+              <label>
+                <span class="label-text" data-i18n="labels.supportedHorizons">Supported Horizons</span>
+                <div id="cfg-supported-horizons" class="inline-chip-wrap" aria-live="polite"></div>
+                <span class="field-hint" data-i18n="parameters.hintSupportedHorizons">The decision horizon selector can only switch between these values.</span>
+              </label>
+              <label class="checkbox-label">
+                <input id="cfg-engine-enabled" name="engine_enabled" type="checkbox">
+                <span class="label-text" data-i18n="labels.engineEnabled">Engine Enabled</span>
+              </label>
+              <label>
+                <span class="label-text" data-i18n="labels.engineUniverseSize">Engine Universe Size</span>
+                <input id="cfg-engine-universe-size" name="engine_universe_size" type="number" min="1" required>
+              </label>
+              <label>
+                <span class="label-text" data-i18n="labels.engineRefresh">Engine Refresh</span>
+                <input id="cfg-engine-refresh-seconds" name="engine_refresh_seconds" type="number" min="5" required>
+              </label>
+              <label>
+                <span class="label-text" data-i18n="labels.engineMaxSignals">Engine Max Signals</span>
+                <input id="cfg-engine-max-signals" name="engine_max_signals" type="number" min="1" required>
+              </label>
+              <label>
+                <span class="label-text" data-i18n="labels.snapshotTimeframe">Snapshot Timeframe</span>
+                <select id="cfg-snapshot-timeframe" name="snapshot_timeframe" required>
+                  <option value="1m">1m</option>
+                  <option value="5m">5m</option>
+                  <option value="15m">15m</option>
+                  <option value="30m">30m</option>
+                  <option value="1h">1h</option>
+                </select>
+                <span class="field-hint" data-i18n="parameters.hintSnapshotTimeframe">Sets the candle size used while collecting raw market snapshots.</span>
+              </label>
+              <label>
+                <span class="label-text" data-i18n="labels.snapshotInterval">Snapshot Interval</span>
+                <input id="cfg-snapshot-interval-minutes" name="snapshot_interval_minutes" type="number" min="1" required>
+                <span class="field-hint" data-i18n="parameters.hintSnapshotInterval">Defines how often the engine samples market data.</span>
+              </label>
+              <label>
+                <span class="label-text" data-i18n="labels.aggregationWindow">Aggregation Window</span>
+                <input id="cfg-hourly-window" name="hourly_aggregation_window" type="number" min="1" required>
+                <span class="field-hint" data-i18n="parameters.hintAggregationWindow">Total snapshots stored for a single aggregate decision.</span>
+              </label>
+              <label>
+                <span class="label-text" data-i18n="labels.minimumSnapshots">Minimum Snapshots</span>
+                <input id="cfg-hourly-min-snapshots" name="hourly_min_snapshots" type="number" min="1" required>
+                <span class="field-hint" data-i18n="parameters.hintMinimumSnapshots">Minimum usable sample size before fallback mode starts.</span>
+              </label>
+              <label>
+                <span class="label-text" data-i18n="labels.bullishThreshold">Bullish Threshold</span>
+                <input id="cfg-aggregation-threshold" name="aggregation_bullish_threshold" type="number" min="0" max="1" step="0.01" required>
+                <span class="field-hint" data-i18n="parameters.hintBullishThreshold">Minimum bullish snapshot ratio needed before the aggregate turns constructive.</span>
+              </label>
+            </div>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step1ScoreTitle">Step1 Skor Ağırlıkları</h3>
+              <p data-i18n="parameters.step1ScoreSub">Bileşik sinyal üretiminde kullanılan ağırlıklar.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.aggregationWeightTrend">Trend Ağırlığı</span><input id="cfg-aggregation-weight-trend" name="aggregation_weight_trend" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.aggregationWeightSlope">Eğim Ağırlığı</span><input id="cfg-aggregation-weight-slope" name="aggregation_weight_slope" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.aggregationWeightRsi">RSI Ağırlığı</span><input id="cfg-aggregation-weight-rsi" name="aggregation_weight_rsi" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.aggregationWeightMacd">MACD Ağırlığı</span><input id="cfg-aggregation-weight-macd" name="aggregation_weight_macd" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.aggregationWeightAdx">ADX Ağırlığı</span><input id="cfg-aggregation-weight-adx" name="aggregation_weight_adx" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.aggregationWeightVolume">Hacim Ağırlığı</span><input id="cfg-aggregation-weight-volume" name="aggregation_weight_volume" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.aggregationWeightBreakout">Kırılım Ağırlığı</span><input id="cfg-aggregation-weight-breakout" name="aggregation_weight_breakout" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.aggregationStabilityCap">İstikrar Kapağı</span><input id="cfg-aggregation-stability-cap" name="aggregation_stability_stddev_cap" type="number" min="0.01" max="2" step="0.01" required></label>
+            </div>
+          </div>
+        </section>
+        <section id="parameter-step2" class="parameter-panel" aria-hidden="true">
+          <div class="parameter-status-grid">
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusTechnicalFrame">Technical Frames</span>
+              <strong id="parameter-step2-frames">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusBreakoutRule">Breakout Rule</span>
+              <strong id="parameter-step2-breakout">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusWeightTotal">Weight Total</span>
+              <strong id="parameter-step2-weights">-</strong>
+            </article>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step2CoreTitle">Step2 Teknik Filtre</h3>
+              <p data-i18n="parameters.step2CoreSub">Trend, momentum ve giriş kalitesi ayarları.</p>
+            </div>
+            <div class="form-grid">
+              <label class="checkbox-label"><input id="cfg-engine-include-step2" name="engine_include_step2" type="checkbox"><span class="label-text" data-i18n="labels.includeStep2">Include Step2</span></label>
+              <label><span class="label-text" data-i18n="labels.technicalMainTimeframe">Ana Zaman Dilimi</span><select id="cfg-technical-main-timeframe" name="technical_main_timeframe" required></select></label>
+              <label><span class="label-text" data-i18n="labels.technicalConfirmationTimeframe">Onay Zaman Dilimi</span><select id="cfg-technical-confirmation-timeframe" name="technical_confirmation_timeframe" required></select></label>
+              <label class="checkbox-label"><input id="cfg-technical-secondary-confirmation" name="technical_use_secondary_confirmation" type="checkbox"><span class="label-text" data-i18n="labels.technicalSecondaryConfirmation">İkincil Onay Kullan</span></label>
+              <label><span class="label-text" data-i18n="labels.technicalPassThreshold">Geçiş Eşiği</span><input id="cfg-technical-pass-threshold" name="technical_pass_threshold" type="number" min="0" max="100" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalOhlcvLimit">OHLCV Limit</span><input id="cfg-technical-ohlcv-limit" name="technical_ohlcv_limit" type="number" min="50" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalMinRows">Minimum Mum</span><input id="cfg-technical-min-ohlcv-rows" name="technical_min_ohlcv_rows" type="number" min="50" required></label>
+            </div>
+          </div>
+
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step2TrendTitle">Trend ve Ortalama</h3>
+              <p data-i18n="parameters.step2TrendSub">EMA yönü, slope ve trend gücü eşikleri.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.technicalMaFast">Hızlı Ortalama</span><input id="cfg-technical-ma-fast" name="technical_ma_fast_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalMaSlow">Yavaş Ortalama</span><input id="cfg-technical-ma-slow" name="technical_ma_slow_period" type="number" min="3" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalMaSlopeLookback">Slope Bakış</span><input id="cfg-technical-ma-slope-lookback" name="technical_ma_slope_lookback" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalMaSlopeMinPct">Slope Alt Eşik</span><input id="cfg-technical-ma-slope-min-pct" name="technical_ma_slope_min_pct" type="number" min="-0.2" max="0.2" step="0.0001" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalMaSlopeGoodPct">Slope Güçlü Eşik</span><input id="cfg-technical-ma-slope-good-pct" name="technical_ma_slope_good_pct" type="number" min="-0.2" max="0.5" step="0.0001" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalAdxPeriod">ADX Periyodu</span><input id="cfg-technical-adx-period" name="technical_adx_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalAdxMin">ADX Alt Eşik</span><input id="cfg-technical-adx-min" name="technical_adx_min" type="number" min="0" max="100" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalAdxStrong">ADX Güçlü Eşik</span><input id="cfg-technical-adx-strong" name="technical_adx_strong" type="number" min="0" max="100" step="0.1" required></label>
+            </div>
+          </div>
+
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step2MomentumTitle">Momentum</h3>
+              <p data-i18n="parameters.step2MomentumSub">RSI, MACD ve stochastic davranışı.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.technicalRsiPeriod">RSI Periyodu</span><input id="cfg-technical-rsi-period" name="technical_rsi_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalRsiMin">RSI Alt Band</span><input id="cfg-technical-rsi-min" name="technical_rsi_bullish_min" type="number" min="0" max="100" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalRsiMax">RSI Üst Band</span><input id="cfg-technical-rsi-max" name="technical_rsi_bullish_max" type="number" min="0" max="100" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalRsiExtreme">RSI Aşırı Bölge</span><input id="cfg-technical-rsi-extreme" name="technical_rsi_extreme" type="number" min="0" max="100" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalMacdFast">MACD Hızlı</span><input id="cfg-technical-macd-fast" name="technical_macd_fast" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalMacdSlow">MACD Yavaş</span><input id="cfg-technical-macd-slow" name="technical_macd_slow" type="number" min="3" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalMacdSignal">MACD Sinyal</span><input id="cfg-technical-macd-signal" name="technical_macd_signal" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalStochPeriod">Stoch Periyodu</span><input id="cfg-technical-stoch-period" name="technical_stoch_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalStochBullishMin">Stoch Alt Band</span><input id="cfg-technical-stoch-bullish-min" name="technical_stoch_bullish_min" type="number" min="0" max="100" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalStochOverbought">Stoch Aşırı Bölge</span><input id="cfg-technical-stoch-overbought" name="technical_stoch_overbought" type="number" min="0" max="100" step="0.1" required></label>
+            </div>
+          </div>
+
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step2VolatilityTitle">Volatilite ve Yapı</h3>
+              <p data-i18n="parameters.step2VolatilitySub">ATR, Bollinger ve uzama filtreleri.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.technicalAtrPeriod">ATR Periyodu</span><input id="cfg-technical-atr-period" name="technical_atr_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalAtrPctMin">ATR Alt Oran</span><input id="cfg-technical-atr-pct-min" name="technical_atr_pct_min" type="number" min="0" max="1" step="0.0001" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalAtrPctMax">ATR Üst Oran</span><input id="cfg-technical-atr-pct-max" name="technical_atr_pct_max" type="number" min="0" max="1" step="0.0001" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalBbandsPeriod">Bollinger Periyodu</span><input id="cfg-technical-bbands-period" name="technical_bbands_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalBbandsStddev">Bollinger Std</span><input id="cfg-technical-bbands-stddev" name="technical_bbands_stddev" type="number" min="0.1" max="6" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalBbCompressionMax">Sıkışma Eşiği</span><input id="cfg-technical-bb-width-compression-max" name="technical_bb_width_compression_max" type="number" min="0" max="2" step="0.001" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalBbExpansionMin">Genişleme Eşiği</span><input id="cfg-technical-bb-width-expansion-min" name="technical_bb_width_expansion_min" type="number" min="0" max="2" step="0.001" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalOverextendedAboveUpperPct">Aşırı Uzama Oranı</span><input id="cfg-technical-overextended-above-upper-pct" name="technical_overextended_above_upper_pct" type="number" min="0" max="0.5" step="0.0001" required></label>
+            </div>
+          </div>
+
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step2EntryTitle">Hacim ve Giriş</h3>
+              <p data-i18n="parameters.step2EntrySub">Hacim ortalaması, kırılım ve pullback toleransı.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.technicalVolumeMaPeriod">Hacim Ortalama Periyodu</span><input id="cfg-technical-volume-ma-period" name="technical_volume_ma_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalVolumeRatioMin">Min Hacim Oranı</span><input id="cfg-technical-volume-ratio-min" name="technical_volume_ratio_min" type="number" min="0" max="50" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalVolumeRatioStrong">Güçlü Hacim Oranı</span><input id="cfg-technical-volume-ratio-strong" name="technical_volume_ratio_strong" type="number" min="0" max="50" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalBreakoutLookback">Kırılım Bakış</span><input id="cfg-technical-breakout-lookback" name="technical_breakout_lookback" type="number" min="5" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalBreakoutBuffer">Kırılım Buffer</span><input id="cfg-technical-breakout-buffer" name="technical_breakout_buffer_pct" type="number" min="0" max="0.2" step="0.0001" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalPullbackTolerancePct">Pullback Toleransı</span><input id="cfg-technical-pullback-tolerance-pct" name="technical_pullback_tolerance_pct" type="number" min="0" max="0.5" step="0.0001" required></label>
+            </div>
+          </div>
+
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step2RiskTitle">Ceza ve Güvenlik</h3>
+              <p data-i18n="parameters.step2RiskSub">Eksik veri, ikincil onay ve noisy yapı cezaları.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.technicalMissingCriticalPenalty">Kritik Eksik Ceza</span><input id="cfg-technical-missing-critical-penalty" name="technical_missing_critical_penalty" type="number" min="0" max="50" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalSecondaryConfirmationPenalty">İkincil Onay Ceza</span><input id="cfg-technical-secondary-confirmation-penalty" name="technical_secondary_confirmation_penalty" type="number" min="0" max="50" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalOverextendedPenalty">Aşırı Uzama Ceza</span><input id="cfg-technical-overextended-penalty" name="technical_overextended_penalty" type="number" min="0" max="50" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalNoisyPenalty">Noisy Yapı Ceza</span><input id="cfg-technical-noisy-penalty" name="technical_noisy_penalty" type="number" min="0" max="50" step="0.1" required></label>
+              <label class="field-span-2"><span class="label-text" data-i18n="labels.technicalCriticalIndicators">Kritik Göstergeler</span><input id="cfg-technical-critical-indicators" name="technical_critical_indicators" type="text" placeholder="close, ema_fast, ema_slow, rsi"></label>
+            </div>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step2WeightsTitle">Step2 Ağırlıkları</h3>
+              <p data-i18n="parameters.step2WeightsSub">Teknik skor bileşenlerinin etkisi.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.technicalWeightTrend">Trend</span><input id="cfg-technical-weight-trend" name="technical_weight_trend" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalWeightMomentum">Momentum</span><input id="cfg-technical-weight-momentum" name="technical_weight_momentum" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalWeightVolatility">Volatilite</span><input id="cfg-technical-weight-volatility" name="technical_weight_volatility" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalWeightVolume">Hacim</span><input id="cfg-technical-weight-volume" name="technical_weight_volume" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.technicalWeightEntry">Giriş</span><input id="cfg-technical-weight-entry" name="technical_weight_entry" type="number" min="0" max="1" step="0.01" required></label>
+            </div>
+          </div>
+        </section>
+        <section id="parameter-step3" class="parameter-panel" aria-hidden="true">
+          <div class="parameter-status-grid">
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusRegimeScope">Regime Scope</span>
+              <strong id="parameter-step3-scope">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusVetoRules">Veto Rules</span>
+              <strong id="parameter-step3-veto">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusWeightTotal">Weight Total</span>
+              <strong id="parameter-step3-weights">-</strong>
+            </article>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step3CoreTitle">Step3 Rejim Filtresi</h3>
+              <p data-i18n="parameters.step3CoreSub">BTC rejimi, genişlik ve veto koşulları.</p>
+            </div>
+            <div class="form-grid">
+              <label class="checkbox-label"><input id="cfg-engine-include-step3" name="engine_include_step3" type="checkbox"><span class="label-text" data-i18n="labels.includeStep3">Include Step3</span></label>
+              <label><span class="label-text" data-i18n="labels.regimeBtcSymbol">BTC Sembolü</span><input id="cfg-regime-btc-symbol" name="regime_btc_symbol" type="text" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeTimeframe">Rejim Zaman Dilimi</span><select id="cfg-regime-timeframe" name="regime_timeframe" required></select></label>
+              <label><span class="label-text" data-i18n="labels.regimeOhlcvLimit">OHLCV Limit</span><input id="cfg-regime-ohlcv-limit" name="regime_ohlcv_limit" type="number" min="50" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeMinRows">Minimum Mum</span><input id="cfg-regime-min-ohlcv-rows" name="regime_min_ohlcv_rows" type="number" min="50" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBtcMaFast">BTC Hızlı Ortalama</span><input id="cfg-regime-btc-ma-fast" name="regime_btc_ma_fast_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBtcMaSlow">BTC Yavaş Ortalama</span><input id="cfg-regime-btc-ma-slow" name="regime_btc_ma_slow_period" type="number" min="3" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBtcSlopeLookback">BTC Slope Bakış</span><input id="cfg-regime-btc-slope-lookback" name="regime_btc_slope_lookback" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBtcSlopeMinPct">BTC Slope Alt Eşik</span><input id="cfg-regime-btc-slope-min-pct" name="regime_btc_slope_min_pct" type="number" min="-0.3" max="0.3" step="0.001" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBtcSlopeGoodPct">BTC Slope Güçlü Eşik</span><input id="cfg-regime-btc-slope-good-pct" name="regime_btc_slope_good_pct" type="number" min="-0.3" max="0.5" step="0.001" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeAdxPeriod">ADX Periyodu</span><input id="cfg-regime-adx-period" name="regime_adx_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeAdxMin">ADX Alt Eşik</span><input id="cfg-regime-adx-min" name="regime_adx_min" type="number" min="0" max="100" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeAdxStrong">ADX Güçlü Eşik</span><input id="cfg-regime-adx-strong" name="regime_adx_strong" type="number" min="0" max="100" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeAtrPeriod">ATR Periyodu</span><input id="cfg-regime-atr-period" name="regime_atr_period" type="number" min="2" required></label>
+              <label class="checkbox-label"><input id="cfg-regime-breadth-enabled" name="regime_breadth_enabled" type="checkbox"><span class="label-text" data-i18n="labels.regimeBreadthEnabled">Piyasa Genişliği</span></label>
+              <label class="checkbox-label"><input id="cfg-regime-derivatives-enabled" name="regime_derivatives_enabled" type="checkbox"><span class="label-text" data-i18n="labels.regimeDerivativesEnabled">Türev Verisi</span></label>
+              <label><span class="label-text" data-i18n="labels.regimeAtrDanger">ATR Tehlike Eşiği</span><input id="cfg-regime-atr-danger" name="regime_atr_danger_pct" type="number" min="0" max="2" step="0.001" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeDrawdownLookback">Drawdown Bakış</span><input id="cfg-regime-drawdown-lookback" name="regime_drawdown_lookback" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeDrawdownDanger">Drawdown Tehlike Eşiği</span><input id="cfg-regime-drawdown-danger" name="regime_drawdown_danger_pct" type="number" min="0" max="1" step="0.001" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBullishThreshold">Boğa Eşiği</span><input id="cfg-regime-bullish-threshold" name="regime_score_bullish_threshold" type="number" min="0" max="100" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeNeutralThreshold">Nötr Eşiği</span><input id="cfg-regime-neutral-threshold" name="regime_score_neutral_threshold" type="number" min="0" max="100" step="0.1" required></label>
+              <label class="checkbox-label"><input id="cfg-regime-allow-neutral" name="regime_allow_neutral" type="checkbox"><span class="label-text" data-i18n="labels.regimeAllowNeutral">Nötr Rejime İzin Ver</span></label>
+              <label class="checkbox-label"><input id="cfg-regime-veto-bearish" name="regime_veto_if_bearish" type="checkbox"><span class="label-text" data-i18n="labels.regimeVetoBearish">Ayıda Veto</span></label>
+              <label class="checkbox-label"><input id="cfg-regime-veto-danger" name="regime_veto_if_danger" type="checkbox"><span class="label-text" data-i18n="labels.regimeVetoDanger">Tehlikede Veto</span></label>
+            </div>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step3BreadthTitle">Step3 Breadth Ayarları</h3>
+              <p data-i18n="parameters.step3BreadthSub">Piyasa genişliği örneklemesi ve oran eşikleri.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.regimeBreadthTimeframe">Breadth Zaman Dilimi</span><select id="cfg-regime-breadth-timeframe" name="regime_breadth_timeframe" required></select></label>
+              <label><span class="label-text" data-i18n="labels.regimeBreadthSymbolCount">Breadth Sembol Sayısı</span><input id="cfg-regime-breadth-symbol-count" name="regime_breadth_symbol_count" type="number" min="1" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBreadthMinSamples">Breadth Minimum Örnek</span><input id="cfg-regime-breadth-min-samples" name="regime_breadth_min_samples" type="number" min="1" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBreadthFastPeriod">Breadth Hızlı Ortalama</span><input id="cfg-regime-breadth-fast-period" name="regime_breadth_fast_period" type="number" min="2" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBreadthSlowPeriod">Breadth Yavaş Ortalama</span><input id="cfg-regime-breadth-slow-period" name="regime_breadth_slow_period" type="number" min="3" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBreadthBearishRatio">Breadth Ayı Oranı</span><input id="cfg-regime-breadth-bearish-ratio" name="regime_breadth_bearish_ratio" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeBreadthBullishRatio">Breadth Boğa Oranı</span><input id="cfg-regime-breadth-bullish-ratio" name="regime_breadth_bullish_ratio" type="number" min="0" max="1" step="0.01" required></label>
+            </div>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step3DerivativesTitle">Step3 Türev ve Fallback</h3>
+              <p data-i18n="parameters.step3DerivativesSub">Fonlama, nötr skor ve fallback cezası ayarları.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.regimeDerivativesSymbol">Türev Sembolü</span><input id="cfg-regime-derivatives-symbol" name="regime_derivatives_symbol" type="text"></label>
+              <label><span class="label-text" data-i18n="labels.regimeFundingAbsMax">Fonlama Üst Sınırı</span><input id="cfg-regime-funding-abs-max" name="regime_funding_abs_max" type="number" min="0" max="1" step="0.0001" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeDerivativesNeutralScore">Türev Nötr Skoru</span><input id="cfg-regime-derivatives-neutral-score" name="regime_derivatives_neutral_score" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeFallbackPenaltyPoints">Fallback Ceza Puanı</span><input id="cfg-regime-fallback-penalty-points" name="regime_fallback_penalty_points" type="number" min="0" max="50" step="0.1" required></label>
+            </div>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.step3WeightsTitle">Step3 Ağırlıkları</h3>
+              <p data-i18n="parameters.step3WeightsSub">Rejim skoru bileşenlerinin etkisi.</p>
+            </div>
+            <div class="form-grid">
+              <label><span class="label-text" data-i18n="labels.regimeWeightTrend">Trend</span><input id="cfg-regime-weight-trend" name="regime_weight_trend" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeWeightVolatility">Volatilite</span><input id="cfg-regime-weight-volatility" name="regime_weight_volatility" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeWeightBreadth">Genişlik</span><input id="cfg-regime-weight-breadth" name="regime_weight_breadth" type="number" min="0" max="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.regimeWeightDerivatives">Türev</span><input id="cfg-regime-weight-derivatives" name="regime_weight_derivatives" type="number" min="0" max="1" step="0.01" required></label>
+            </div>
+          </div>
+        </section>
+        <section id="parameter-ai" class="parameter-panel" aria-hidden="true">
+          <div class="parameter-status-grid">
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusAiMode">AI Mode</span>
+              <strong id="parameter-ai-mode">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusAiThreshold">AI Threshold</span>
+              <strong id="parameter-ai-threshold">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusAiProvider">Provider Settings</span>
+              <strong id="parameter-ai-provider-note">-</strong>
+            </article>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.aiCoreTitle">Yapay Zeka Desteği</h3>
+              <p data-i18n="parameters.aiCoreSub">Aktif sağlayıcı, eşikler ve model zaman aşımı ayarları.</p>
+            </div>
+            <div class="form-grid">
+              <label class="checkbox-label"><input id="cfg-engine-include-ai-support" name="engine_include_ai_support" type="checkbox"><span class="label-text" data-i18n="labels.includeAiSupport">Include AI Support</span></label>
+              <label><span class="label-text" data-i18n="labels.llmProvider">LLM Provider</span><select id="cfg-llm-provider" name="llm_provider"><option value="disabled">disabled</option><option value="deepseek">deepseek</option><option value="gemini">gemini</option></select></label>
+              <label><span class="label-text" data-i18n="labels.aiShortlistLimit">AI Shortlist Limit</span><input id="cfg-deepseek-shortlist-limit" name="deepseek_shortlist_limit" type="number" min="1" required></label>
+              <label><span class="label-text" data-i18n="labels.aiMinimumAggregateScore">AI Minimum Aggregate Score</span><input id="cfg-deepseek-min-aggregate-score" name="deepseek_min_aggregate_score" type="number" min="0" max="1" step="0.01" required></label>
+              <div class="provider-block" data-provider-block="deepseek">
+                <label class="checkbox-label"><input id="cfg-deepseek-enabled" name="deepseek_enabled" type="checkbox"><span class="label-text" data-i18n="labels.deepseekEnabled">DeepSeek Enabled</span></label>
+                <label><span class="label-text" data-i18n="labels.deepseekModel">DeepSeek Model</span><input id="cfg-deepseek-model" name="deepseek_model" type="text" required></label>
+                <label><span class="label-text" data-i18n="labels.deepseekTimeout">DeepSeek Timeout</span><input id="cfg-deepseek-timeout-seconds" name="deepseek_timeout_seconds" type="number" min="1" required></label>
+              </div>
+              <div class="provider-block" data-provider-block="gemini">
+                <label><span class="label-text" data-i18n="labels.geminiModel">Gemini Model</span><input id="cfg-gemini-model" name="gemini_model" type="text" required></label>
+                <label><span class="label-text" data-i18n="labels.geminiTimeout">Gemini Timeout</span><input id="cfg-gemini-timeout-seconds" name="gemini_timeout_seconds" type="number" min="1" required></label>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section id="parameter-paper" class="parameter-panel" aria-hidden="true">
+          <div class="parameter-status-grid">
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusPaperRisk">Risk Budget</span>
+              <strong id="parameter-paper-risk">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusPaperGate">Trade Gate</span>
+              <strong id="parameter-paper-gate">-</strong>
+            </article>
+            <article class="parameter-status-item">
+              <span data-i18n="parameters.statusPaperExit">Exit Rule</span>
+              <strong id="parameter-paper-exit">-</strong>
+            </article>
+          </div>
+          <div class="parameter-group">
+            <div class="parameter-group-header">
+              <h3 data-i18n="parameters.paperCoreTitle">Simülasyon Parametreleri</h3>
+              <p data-i18n="parameters.paperCoreSub">Paper masa risk ve pozisyon ayarları.</p>
+            </div>
+            <div class="form-grid">
+              <label class="checkbox-label"><input id="cfg-paper-enabled" name="paper_bot_enabled" type="checkbox"><span class="label-text" data-i18n="labels.paperEnabled">Simülasyon Açık</span></label>
+              <label><span class="label-text" data-i18n="labels.paperInitialCapital">Başlangıç Sermayesi</span><input id="cfg-paper-initial-capital" name="paper_initial_capital" type="number" min="1" step="0.01" required></label>
+              <label><span class="label-text" data-i18n="labels.paperMaxOpenPositions">Maks Açık Pozisyon</span><input id="cfg-paper-max-open-positions" name="paper_max_open_positions" type="number" min="1" required></label>
+              <label><span class="label-text" data-i18n="labels.paperRiskPerTrade">İşlem Başına Risk</span><input id="cfg-paper-risk-per-trade-pct" name="paper_risk_per_trade_pct" type="number" min="0.001" max="1" step="0.001" required></label>
+              <label><span class="label-text" data-i18n="labels.paperMinSignalScore">Min Sinyal Skoru</span><input id="cfg-paper-min-signal-score" name="paper_min_signal_score" type="number" min="0" max="1" step="0.01" required></label>
+              <label class="checkbox-label"><input id="cfg-paper-require-final-selected" name="paper_require_final_selected" type="checkbox"><span class="label-text" data-i18n="labels.paperRequireFinalSelected">Final Seçim Zorunlu</span></label>
+              <label class="checkbox-label"><input id="cfg-paper-require-step2-pass" name="paper_require_step2_pass" type="checkbox"><span class="label-text" data-i18n="labels.paperRequireStep2">Step2 Geçişi Zorunlu</span></label>
+              <label class="checkbox-label"><input id="cfg-paper-require-step3-pass" name="paper_require_step3_pass" type="checkbox"><span class="label-text" data-i18n="labels.paperRequireStep3">Step3 Geçişi Zorunlu</span></label>
+              <label class="checkbox-label"><input id="cfg-paper-require-window-complete" name="paper_require_window_complete" type="checkbox"><span class="label-text" data-i18n="labels.paperRequireWindowComplete">Tam Pencere Zorunlu</span></label>
+              <label><span class="label-text" data-i18n="labels.paperAtrStopMultiplier">ATR Stop Çarpanı</span><input id="cfg-paper-atr-stop-multiplier" name="paper_atr_stop_multiplier" type="number" min="0.1" max="50" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.paperRiskRewardRatio">Risk / Getiri</span><input id="cfg-paper-risk-reward-ratio" name="paper_risk_reward_ratio" type="number" min="0.1" max="50" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.paperMaxHoldMinutes">Maks Bekleme Dakikası</span><input id="cfg-paper-max-hold-minutes" name="paper_max_hold_minutes" type="number" min="1" required></label>
+              <label><span class="label-text" data-i18n="labels.paperFeeBps">Komisyon (bps)</span><input id="cfg-paper-fee-bps" name="paper_fee_bps" type="number" min="0" max="500" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.paperSlippageBps">Slippage (bps)</span><input id="cfg-paper-slippage-bps" name="paper_slippage_bps" type="number" min="0" max="500" step="0.1" required></label>
+              <label><span class="label-text" data-i18n="labels.paperRefreshSeconds">Simülasyon Yenileme</span><input id="cfg-paper-refresh-seconds" name="paper_refresh_seconds" type="number" min="5" required></label>
+              <label class="checkbox-label"><input id="cfg-paper-sync-engine-before-run" name="paper_sync_engine_before_run" type="checkbox"><span class="label-text" data-i18n="labels.paperSyncEngineBeforeRun">Tur Öncesi Motor Senkronu</span></label>
+            </div>
+          </div>
+        </section>
+        <div class="form-actions form-actions-sticky">
+          <button class="btn btn-primary" type="submit" data-i18n="runtime.saveConfig">Save Runtime Config</button>
+          <button id="runtime-reset-btn" class="btn btn-danger" type="button" data-i18n="runtime.resetDefaults">Reset to Defaults</button>
+          <span class="form-actions-note" data-i18n="parameters.actionsNote">Değişiklikler kaydedildikten sonra çalışma yapılandırmasına yazılır.</span>
+        </div>
+        <div class="runtime-path-note">
+          <span data-i18n="labels.runtimePath">Runtime Path</span>
+          <strong id="status-runtime-path">-</strong>
+        </div>
+        <div id="runtime-form-error" class="form-error hidden"></div>
+      </form>
+    </section>
+  </div>
+</section>
+
+<section id="paper-tab" class="tab-panel" role="tabpanel" aria-hidden="true">
+  <div class="content-grid content-grid--compact">
+    <section class="panel">
+      <div class="panel-header panel-header-split">
+        <div>
+          <h2 data-i18n="paper.statusTitle">Paper Bot Status</h2>
+          <p data-i18n="paper.statusSub">Paper cycle runtime, cadence, and trade desk state</p>
+        </div>
+        <div class="panel-header-actions">
+          <button id="paper-start-btn" class="btn btn-secondary" type="button" data-i18n="controls.startPaperRunner">Start Simulation</button>
+          <button id="paper-stop-btn" class="btn btn-secondary" type="button" data-i18n="controls.stopPaperRunner">Stop Simulation</button>
+          <button id="paper-run-once-btn" class="btn btn-primary" type="button" data-i18n="controls.runPaperCycle">Run Paper Cycle</button>
+          <button id="paper-reset-btn" class="btn btn-secondary" type="button" data-i18n="controls.resetPaperPortfolio">Reset Paper Portfolio</button>
+        </div>
+      </div>
+      <div class="status-chip-grid">
+        <div class="status-chip">
+          <span data-i18n="labels.paperRunner">Simulation Runner</span>
+          <strong id="paper-running" class="badge badge-neutral">unknown</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperEnabled">Simulation Enabled</span>
+          <strong id="paper-enabled" class="badge badge-neutral">unknown</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.lastRun">Last Run</span>
+          <strong id="paper-last-run">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.lastSuccess">Last Success</span>
+          <strong id="paper-last-success">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperRefreshSeconds">Refresh</span>
+          <strong id="paper-refresh-seconds">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperSyncEngineBeforeRun">Signal Sync</span>
+          <strong id="paper-sync-engine-before-run" class="badge badge-neutral">unknown</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperOpenedLastCycle">Opened</span>
+          <strong id="paper-last-opened-count">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperClosedLastCycle">Closed</span>
+          <strong id="paper-last-closed-count">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.openTrades">Open Trades</span>
+          <strong id="paper-open-count">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.closedTrades">Closed Trades</span>
+          <strong id="paper-closed-count">0</strong>
+        </div>
+        <div class="status-chip status-chip--wide">
+          <span data-i18n="labels.lastError">Last Error</span>
+          <strong id="paper-last-error">-</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2 data-i18n="paper.portfolioTitle">Paper Portfolio</h2>
+        <p data-i18n="paper.portfolioSub">Simulated balance and PnL overview</p>
+      </div>
+      <div class="status-chip-grid">
+        <div class="status-chip">
+          <span data-i18n="labels.equity">Equity</span>
+          <strong id="paper-equity">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.cash">Cash</span>
+          <strong id="paper-cash-balance-detail">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.realizedPnl">Realized PnL</span>
+          <strong id="paper-realized-pnl-detail">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.unrealizedPnl">Unrealized PnL</span>
+          <strong id="paper-unrealized-pnl-detail">-</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="content-grid content-grid--compact">
+    <section class="panel">
+      <div class="panel-header">
+        <h2 data-i18n="paper.metricsTitle">Paper Performance</h2>
+        <p data-i18n="paper.metricsSub">Win rate, expectancy, drawdown, and trade quality summary</p>
+      </div>
+      <div class="status-chip-grid">
+        <div class="status-chip">
+          <span data-i18n="labels.paperTotalClosedTrades">Total Closed</span>
+          <strong id="paper-metrics-total-closed">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.wins">Wins</span>
+          <strong id="paper-win-count">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.losses">Losses</span>
+          <strong id="paper-loss-count">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperWinRate">Win Rate</span>
+          <strong id="paper-metrics-win-rate">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperExpectancy">Expectancy</span>
+          <strong id="paper-metrics-expectancy">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperProfitFactor">Profit Factor</span>
+          <strong id="paper-metrics-profit-factor">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperBestTrade">Best Trade</span>
+          <strong id="paper-metrics-best-trade">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperWorstTrade">Worst Trade</span>
+          <strong id="paper-metrics-worst-trade">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.paperMaxDrawdown">Max Drawdown</span>
+          <strong id="paper-metrics-max-drawdown">0</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="content-grid">
+    <section class="panel">
+      <div class="panel-header panel-header-split">
+        <div>
+          <h2 data-i18n="paper.historicalTitle">Historical Replay</h2>
+          <p data-i18n="paper.historicalSub">Replay one symbol between two dates using the current runtime parameters.</p>
+        </div>
+        <div class="panel-header-actions">
+          <button id="historical-run-btn" class="btn btn-primary" type="button" data-i18n="controls.runHistoricalSimulation">Run Historical Simulation</button>
+        </div>
+      </div>
+      <div class="parameter-overview-note">
+        <strong data-i18n="paper.historicalNoteTitle">Active parameter set is used</strong>
+        <p data-i18n="paper.historicalNoteSub">The replay uses the current Step1, Step2, Step3, and Simulation settings from the Parameters page.</p>
+      </div>
+      <div class="form-grid">
+        <label>
+          <span class="label-text" data-i18n="labels.historicalSymbol">Symbol</span>
+          <input id="historical-symbol" type="text" placeholder="BTC/USDT" value="BTC/USDT">
+        </label>
+        <label>
+          <span class="label-text" data-i18n="labels.historicalStartAt">Start Date</span>
+          <input id="historical-start-at" type="datetime-local">
+        </label>
+        <label>
+          <span class="label-text" data-i18n="labels.historicalEndAt">End Date</span>
+          <input id="historical-end-at" type="datetime-local">
+        </label>
+        <label class="checkbox-label">
+          <input id="historical-close-open" type="checkbox" checked>
+          <span class="label-text" data-i18n="labels.historicalForceClose">Close open trades at end</span>
+        </label>
+      </div>
+      <div id="historical-form-error" class="form-error hidden"></div>
+      <div class="status-chip-grid">
+        <div class="status-chip">
+          <span data-i18n="labels.historicalResultSymbol">Result Symbol</span>
+          <strong id="historical-result-symbol">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalRange">Range</span>
+          <strong id="historical-result-range">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalFinalEquity">Final Equity</span>
+          <strong id="historical-result-final-equity">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalReturnPct">Return %</span>
+          <strong id="historical-result-return-pct">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalOpenedTrades">Opened Trades</span>
+          <strong id="historical-result-opened-trades">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalClosedTrades">Closed Trades</span>
+          <strong id="historical-result-closed-trades">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalSelectedSignals">Selected Signals</span>
+          <strong id="historical-result-selected-signals">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalEvaluations">Evaluations</span>
+          <strong id="historical-result-evaluations">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalNetProfit">Net Profit</span>
+          <strong id="historical-result-net-profit">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalMaxDrawdown">Max Drawdown</span>
+          <strong id="historical-result-max-drawdown">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalWinRate">Win Rate</span>
+          <strong id="historical-result-win-rate">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.historicalWarnings">Warnings</span>
+          <strong id="historical-result-warning-count">0</strong>
+        </div>
+      </div>
+      <div id="historical-empty-state" class="empty-state" data-i18n="paper.noHistoricalResult">No historical replay result yet.</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2 data-i18n="paper.historicalEvaluationsTitle">Historical Evaluations</h2>
+        <p data-i18n="paper.historicalEvaluationsSub">Latest decision points from the replay window.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="table.eventTime">Time</th>
+              <th data-i18n="table.meanSignal">Mean Signal</th>
+              <th data-i18n="table.step2Score">Step2 Score</th>
+              <th data-i18n="table.step2Pass">Step2 Pass</th>
+              <th data-i18n="table.regime">Regime</th>
+              <th data-i18n="table.step3Pass">Step3 Pass</th>
+              <th data-i18n="table.finalStatus">Final Status</th>
+              <th data-i18n="table.openedTrades">Opened</th>
+              <th data-i18n="table.closedTradesShort">Closed</th>
+            </tr>
+          </thead>
+          <tbody id="historical-evaluations-body"></tbody>
+        </table>
+      </div>
+      <div id="historical-evaluations-empty-state" class="empty-state hidden" data-i18n="paper.noHistoricalEvaluations">No historical evaluations yet.</div>
+    </section>
+  </div>
+
+  <div class="content-grid">
+    <section class="panel">
+      <div class="panel-header">
+        <h2 data-i18n="paper.openTradesTitle">Open Trades</h2>
+        <p data-i18n="paper.openTradesSub">Active paper positions</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="table.tradeId">Trade ID</th>
+              <th data-i18n="table.symbol">Symbol</th>
+              <th data-i18n="table.entry">Entry</th>
+              <th data-i18n="table.current">Current</th>
+              <th data-i18n="table.quantity">Quantity</th>
+              <th data-i18n="table.pnlPct">PnL %</th>
+              <th data-i18n="table.pnlValue">PnL Value</th>
+              <th data-i18n="table.stop">Stop</th>
+              <th data-i18n="table.takeProfit">Take Profit</th>
+              <th data-i18n="table.openedAt">Opened At</th>
+            </tr>
+          </thead>
+          <tbody id="paper-open-trades-body"></tbody>
+        </table>
+      </div>
+      <div id="paper-open-empty-state" class="empty-state hidden" data-i18n="paper.noOpenTrades">No open paper trades.</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <h2 data-i18n="paper.closedTradesTitle">Closed Trades</h2>
+        <p data-i18n="paper.closedTradesSub">Completed paper positions</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="table.tradeId">Trade ID</th>
+              <th data-i18n="table.symbol">Symbol</th>
+              <th data-i18n="table.entry">Entry</th>
+              <th data-i18n="table.exit">Exit</th>
+              <th data-i18n="table.pnlPct">PnL %</th>
+              <th data-i18n="table.pnlValue">PnL Value</th>
+              <th data-i18n="table.reasonClosed">Reason Closed</th>
+              <th data-i18n="table.openedAt">Opened At</th>
+              <th data-i18n="table.closedAt">Closed At</th>
+            </tr>
+          </thead>
+          <tbody id="paper-closed-trades-body"></tbody>
+        </table>
+      </div>
+      <div id="paper-closed-empty-state" class="empty-state hidden" data-i18n="paper.noClosedTrades">No closed paper trades.</div>
+    </section>
+  </div>
+
+  <div class="content-grid content-grid--single">
+    <section class="panel">
+      <div class="panel-header">
+        <h2 data-i18n="paper.eventsTitle">Simulation Journal</h2>
+        <p data-i18n="paper.eventsSub">Recent open, close, run, reset, and warning events</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="table.eventTime">Time</th>
+              <th data-i18n="table.eventType">Type</th>
+              <th data-i18n="table.symbol">Symbol</th>
+              <th data-i18n="table.tradeId">Trade ID</th>
+              <th data-i18n="table.summary">Summary</th>
+              <th data-i18n="table.pnlValue">PnL Value</th>
+            </tr>
+          </thead>
+          <tbody id="paper-events-body"></tbody>
+        </table>
+      </div>
+      <div id="paper-events-empty-state" class="empty-state hidden" data-i18n="paper.noEvents">No simulation events yet.</div>
+    </section>
+  </div>
+</section>
+
+<section id="runtime-tab" class="tab-panel" role="tabpanel" aria-hidden="true">
+  <div class="content-grid content-grid--compact">
+    <section class="panel">
+      <div class="panel-header panel-header-split">
+        <div>
+          <h2 data-i18n="runtime.engineStatusTitle">Engine Status</h2>
+          <p data-i18n="runtime.engineStatusSub">Latest scan cadence, errors, and state counts</p>
+        </div>
+        <div class="panel-header-actions">
+          <button id="engine-run-once-btn" class="btn btn-primary" type="button" data-i18n="controls.runOnce">Run Once</button>
+          <button id="refresh-now-btn" class="btn btn-secondary" type="button" data-i18n="controls.refresh">Refresh</button>
+          <button id="toggle-refresh-btn" class="btn btn-secondary" type="button" data-i18n="controls.pauseAutoRefresh">Pause Auto Refresh</button>
+        </div>
+      </div>
+      <div class="panel-inline-meta">
+        <span id="refresh-meta" class="muted-text" data-i18n="controls.autoRefreshEvery" data-i18n-args='{"seconds":"{{ refresh_seconds }}"}'>Auto refresh every {{ refresh_seconds }}s</span>
+        <span id="last-updated" class="muted-text" data-i18n="controls.lastUpdatedNever">Last updated: never</span>
+      </div>
+      <div class="status-chip-grid">
+        <div class="status-chip">
+          <span data-i18n="labels.engineRunning">Engine Running</span>
+          <strong id="engine-running" class="badge badge-neutral">unknown</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.lastRun">Last Run</span>
+          <strong id="engine-last-run-detail">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.lastSuccess">Last Success</span>
+          <strong id="engine-last-success">-</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.latestSignals">Latest Signals</span>
+          <strong id="engine-signal-count">0</strong>
+        </div>
+        <div class="status-chip">
+          <span data-i18n="labels.latestAiSignals">Latest AI Signals</span>
+          <strong id="engine-ai-signal-count">0</strong>
+        </div>
+        <div class="status-chip status-chip--wide">
+          <span data-i18n="labels.lastError">Last Error</span>
+          <strong id="engine-last-error">-</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+</section>
+{% endblock %}

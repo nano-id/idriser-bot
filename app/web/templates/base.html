@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}ID-Riser{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/dashboard.css?v={{ css_asset_version }}">
+</head>
+<body class="theme-id-riser">
+  <div class="app-frame">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark">ID-R</div>
+        <div class="sidebar-brand-copy">
+          <strong>ID-Riser</strong>
+          <span>Signal Engine</span>
+        </div>
+      </div>
+      {% block sidebar %}{% endblock %}
+      <div class="sidebar-footer">
+        <span class="plan-label" data-i18n="sidebar.controlSurface">Control Surface</span>
+        <strong data-i18n="sidebar.versionLabel" data-i18n-args='{"version":"{{ app_version }}"}'>Version {{ app_version }}</strong>
+        <label class="language-control" for="language-selector">
+          <span data-i18n="sidebar.language">Language</span>
+          <select id="language-selector">
+            <option value="en">English</option>
+            <option value="tr">Türkçe</option>
+          </select>
+        </label>
+      </div>
+    </aside>
+
+    <div class="app-main">
+      <main class="layout-shell">
+        <div class="page-content">
+          {% block content %}{% endblock %}
+        </div>
+      </main>
+    </div>
+  </div>
+  <script defer src="/static/js/dashboard.js?v={{ js_asset_version }}"></script>
+</body>
+</html>

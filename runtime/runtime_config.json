@@ -1,5 +1,5 @@
 {
-  "llm_provider": "gemini",
+  "llm_provider": "disabled",
   "snapshot_timeframe": "5m",
   "snapshot_interval_minutes": 5,
   "hourly_aggregation_window": 12,

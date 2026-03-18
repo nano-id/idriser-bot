@@ -19,14 +19,14 @@ class RuntimeConfig(BaseModel):
     supported_decision_horizons: list[str] = Field(
         default_factory=lambda: ["5m", "15m", "30m", "1h", "2h", "3h", "4h", "6h", "8h", "12h", "1d"]
     )
-    engine_enabled: bool = False
+    engine_enabled: bool = True
     engine_universe_size: int = Field(default=30, ge=1, le=500)
     engine_refresh_seconds: int = Field(default=30, ge=5, le=3600)
-    engine_include_step2: bool = False
-    engine_include_step3: bool = False
+    engine_include_step2: bool = True
+    engine_include_step3: bool = True
     engine_include_ai_support: bool = False
     engine_max_signals: int = Field(default=20, ge=1, le=500)
-    paper_bot_enabled: bool = False
+    paper_bot_enabled: bool = True
     paper_initial_capital: float = Field(default=10_000.0, gt=0)
     paper_max_open_positions: int = Field(default=5, ge=1, le=500)
     paper_risk_per_trade_pct: float = Field(default=0.01, gt=0, le=1)
@@ -35,8 +35,8 @@ class RuntimeConfig(BaseModel):
     paper_require_step2_pass: bool = False
     paper_require_step3_pass: bool = False
     paper_require_window_complete: bool = True
-    paper_fixed_stop_loss_pct: float | None = Field(default=None, gt=0, le=1)
-    paper_fixed_take_profit_pct: float | None = Field(default=None, gt=0, le=1)
+    paper_fixed_stop_loss_pct: float | None = Field(default=0.01, gt=0, le=1)
+    paper_fixed_take_profit_pct: float | None = Field(default=0.03, gt=0, le=1)
     paper_atr_stop_multiplier: float = Field(default=1.5, gt=0, le=50)
     paper_risk_reward_ratio: float = Field(default=2.0, gt=0, le=50)
     paper_max_hold_minutes: int | None = Field(default=None, ge=1, le=20_000)
@@ -45,13 +45,13 @@ class RuntimeConfig(BaseModel):
     paper_refresh_seconds: int = Field(default=60, ge=5, le=3600)
     paper_sync_engine_before_run: bool = True
     aggregation_bullish_threshold: float = Field(default=0.55, ge=0, le=1)
-    aggregation_weight_trend: float = Field(default=0.30, ge=0, le=1)
-    aggregation_weight_slope: float = Field(default=0.10, ge=0, le=1)
-    aggregation_weight_rsi: float = Field(default=0.20, ge=0, le=1)
-    aggregation_weight_macd: float = Field(default=0.15, ge=0, le=1)
-    aggregation_weight_adx: float = Field(default=0.10, ge=0, le=1)
-    aggregation_weight_volume: float = Field(default=0.10, ge=0, le=1)
-    aggregation_weight_breakout: float = Field(default=0.05, ge=0, le=1)
+    aggregation_weight_trend: float = Field(default=0.22, ge=0, le=1)
+    aggregation_weight_slope: float = Field(default=0.08, ge=0, le=1)
+    aggregation_weight_rsi: float = Field(default=0.16, ge=0, le=1)
+    aggregation_weight_macd: float = Field(default=0.14, ge=0, le=1)
+    aggregation_weight_adx: float = Field(default=0.14, ge=0, le=1)
+    aggregation_weight_volume: float = Field(default=0.14, ge=0, le=1)
+    aggregation_weight_breakout: float = Field(default=0.12, ge=0, le=1)
     aggregation_stability_stddev_cap: float = Field(default=0.35, gt=0, le=2)
     technical_main_timeframe: str = "4h"
     technical_confirmation_timeframe: str = "1h"
@@ -66,7 +66,7 @@ class RuntimeConfig(BaseModel):
     technical_ma_slope_good_pct: float = Field(default=0.01, ge=-0.2, le=0.5)
     technical_adx_period: int = Field(default=14, ge=2, le=200)
     technical_adx_min: float = Field(default=18, ge=0, le=100)
-    technical_adx_strong: float = Field(default=32, ge=0, le=100)
+    technical_adx_strong: float = Field(default=25, ge=0, le=100)
     technical_rsi_period: int = Field(default=14, ge=2, le=200)
     technical_rsi_bullish_min: float = Field(default=50, ge=0, le=100)
     technical_rsi_bullish_max: float = Field(default=74, ge=0, le=100)
@@ -123,8 +123,8 @@ class RuntimeConfig(BaseModel):
     regime_btc_slope_min_pct: float = Field(default=0.0, ge=-0.3, le=0.3)
     regime_btc_slope_good_pct: float = Field(default=0.01, ge=-0.3, le=0.5)
     regime_adx_period: int = Field(default=14, ge=2, le=200)
-    regime_adx_min: float = Field(default=18, ge=0, le=100)
-    regime_adx_strong: float = Field(default=30, ge=0, le=100)
+    regime_adx_min: float = Field(default=20, ge=0, le=100)
+    regime_adx_strong: float = Field(default=25, ge=0, le=100)
     regime_atr_period: int = Field(default=14, ge=2, le=200)
     regime_atr_danger_pct: float = Field(default=0.10, ge=0, le=2)
     regime_drawdown_lookback: int = Field(default=24, ge=2, le=500)
@@ -142,11 +142,11 @@ class RuntimeConfig(BaseModel):
     regime_funding_abs_max: float = Field(default=0.0015, ge=0, le=1)
     regime_derivatives_neutral_score: float = Field(default=0.50, ge=0, le=1)
     regime_fallback_penalty_points: float = Field(default=4.0, ge=0, le=50)
-    regime_score_bullish_threshold: float = Field(default=70, ge=0, le=100)
-    regime_score_neutral_threshold: float = Field(default=45, ge=0, le=100)
+    regime_score_bullish_threshold: float = Field(default=65, ge=0, le=100)
+    regime_score_neutral_threshold: float = Field(default=48, ge=0, le=100)
     regime_allow_neutral: bool = True
-    regime_veto_if_bearish: bool = True
-    regime_veto_if_danger: bool = True
+    regime_veto_if_bearish: bool = False
+    regime_veto_if_danger: bool = False
     regime_weight_trend: float = Field(default=0.45, ge=0, le=1)
     regime_weight_volatility: float = Field(default=0.30, ge=0, le=1)
     regime_weight_breadth: float = Field(default=0.20, ge=0, le=1)
